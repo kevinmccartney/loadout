@@ -43,8 +43,20 @@ types: ## Run mypy type-checking
 isort: ## Sort imports with isort
 	poetry run isort .
 
+isort-check: ## Just runs an isort check, but doesn't write files. We use this in CI
+	poetry run isort -c .
+
 lint: ## Lint the codebase with flake8 & pylint
 	poetry run flake8 tests loadout && poetry run pylint tests loadout
 
 init-workspace: ## Sets up the workspace
 	poetry install && pre-commit install
+
+validate-conventional-commit:
+	git log -1 --pretty=%B | poetry run cz check
+
+format:
+	poetry run black .
+
+format-check:
+	poetry run black .

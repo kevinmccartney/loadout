@@ -20,6 +20,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Validate conventional commit
+        run: make validate-conventional-commit
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -28,5 +30,17 @@ jobs:
         run: curl -sSL https://install.python-poetry.org | python3 -
       - name: Install dependencies
         run: make install
+      - name: Format
+        run: make format-check
+      - name: Isort
+        run: make isort-check
       - name: Lint
         run: make lint
+      - name: Bandit
+        run: make bandit
+      - name: Types
+        run: make types
+      - name: Test
+        run: make test-coverage
+      - name: Test Coverage Report
+        run: make test-coverage-report-text
