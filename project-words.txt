@@ -1,5 +1,9 @@
 commitizen
+debugpy
 Isort
 Loadout
 mypy
 Pyenv
+pylint
+pyproject
+pytest
