@@ -59,4 +59,4 @@ format:
 	poetry run black .
 
 format-check:
-	poetry run black .
+	poetry run black --check .
