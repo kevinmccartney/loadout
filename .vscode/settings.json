@@ -115,7 +115,7 @@
   "python.linting.flake8Enabled": true,
   "python.linting.mypyArgs": ["--config-file=pyproject.toml"],
   "python.linting.mypyEnabled": true,
-  "python.linting.pylintArgs": ["--rcfile=.pylintrc"],
+  "python.linting.pylintArgs": ["--rcfile=.pylintrc", "tests", "loadout"],
   "python.linting.pylintEnabled": true,
   "scm.alwaysShowActions": false,
   "terminal.integrated.cursorBlinking": true,
@@ -155,5 +155,10 @@
     "titleBar.inactiveForeground": "#15202b99"
   },
   "workbench.colorTheme": "Dracula",
-  "workbench.iconTheme": "material-icon-theme"
+  "workbench.iconTheme": "material-icon-theme",
+  "python.testing.pytestArgs": ["tests"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.linting.banditArgs": ["-c pyproject.toml"]
+  // "python.linting.pylintPath": "/Users/kevinmccartney/Library/Caches/pypoetry/virtualenvs/loadout-BfFqeuBr-py3.10/bin/pylint"
 }

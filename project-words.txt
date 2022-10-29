@@ -1,1 +1,5 @@
+commitizen
+Isort
 Loadout
+mypy
+Pyenv
