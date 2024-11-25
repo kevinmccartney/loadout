@@ -1,9 +1,5 @@
 #!/usr/bin/env zsh
 
-# deps:
-#   - none
-#   - apps
-
 # Pass in a formula/cask name to get it's install status
 #   $1 PROGRAM (string): The name of the program to check
 #   Return: 0 or 1 to be treated as a bool

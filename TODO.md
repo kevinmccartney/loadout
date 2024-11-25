@@ -2,6 +2,7 @@
 
 ## Now
 
+- [ ] Setup aliases
 - [ ] try asdf
 - [ ] Refactor scripts
 - [ ] Standardized logging
@@ -24,6 +25,7 @@
 - [ ] test all oh my posh segments
 - [ ] Implode command
 - [ ] Vim configuration
+- [ ] Config file
 
 ## Done
 

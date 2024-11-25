@@ -196,20 +196,6 @@ EOF
         echo ".zshrc autoenv configuration present. Continuing..."
     fi
 
-    # aliases
-    #  export ppath=$(echo "$PATH" | tr ':' '\n' )
-    # fzf --preview "bat --color=always --style=numbers --line-range=:500 {}"
-    # fd . -X bat
-    # export add-gitginore=npx add-gitignore
-    # export chokidar=npx chokidar-cli
-    # export carbon=npx carbon-now-cli
-    # export caniuse=npx caniuse-cmd
-    # export serve=npx serve
-    # export doctoc=npx doctoc
-    # export cat=bat
-    # export ls=eza
-    # alias zsrc=source ~/.zshrc
-
     GIT_GLOBAL_CONFIG=$(git config list --global)
 
     GIT_PUSH_AUTO_SETUP_REMOTE_SET=$(echo $GIT_GLOBAL_CONFIG | grep 'push.autosetupremote=true' >/dev/null 2>&1 && echo 0 || echo 1)
@@ -235,4 +221,18 @@ EOF
         echo "Setting git global merge.conflictstyle..."
         git config set --global merge.conflictstyle zdiff3
     fi
+
+    # aliases
+    #  export ppath=$(echo "$PATH" | tr ':' '\n' )
+    # fzf --preview "bat --color=always --style=numbers --line-range=:500 {}"
+    # fd . -X bat
+    # export add-gitginore=npx add-gitignore
+    # export chokidar=npx chokidar-cli
+    # export carbon=npx carbon-now-cli
+    # export caniuse=npx caniuse-cmd
+    # export serve=npx serve
+    # export doctoc=npx doctoc
+    # export cat=bat
+    # export ls=eza
+    # alias zsrc=source ~/.zshrc
 }

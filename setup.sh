@@ -11,13 +11,13 @@ source ./apps.sh
 source ./dracula.sh
 source ./vscode.sh
 
-# setup_system
-# setup_tty
-# setup_nodejs
-# setup_python
-# setup_ruby
-# setup_dotnet
-# setup_go
+setup_system
+setup_tty
+setup_nodejs
+setup_python
+setup_ruby
+setup_dotnet
+setup_go
 setup_apps
-# setup_dracula
-# setup_vscode
+setup_dracula
+setup_vscode

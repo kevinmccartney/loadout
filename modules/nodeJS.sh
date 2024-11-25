@@ -1,8 +1,5 @@
 #!/usr/bin/env zsh
 
-# deps:
-#   - apps
-
 NODE_VERSION="22.11.0"
 
 function setup_nodejs() {

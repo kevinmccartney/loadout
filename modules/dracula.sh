@@ -1,9 +1,5 @@
 #!/usr/bin/env zsh
 
-# deps:
-#   - apps
-#   - nodeJS
-
 APPS=(
     'iterm'
     'git'
@@ -34,20 +30,6 @@ function setup_dracula() {
         fi
 
     done
-
-    # if [ ! -d ~/.dracula-themes/visual-studio-code ]; then
-    #     echo "Installing VS Code theme..."
-    #     git clone https://github.com/dracula/visual-studio-code.git
-    #     cd ~/.dracula-themes/visual-studio-code
-    #     DRACULA_VS_CODE_VERSION=$(cat package.json | jq -r .version)
-    #     npm install
-    #     npm run build
-    #     npx vsce package
-    #     code --install-extension theme-dracula-$DRACULA_VS_CODE_VERSION.vsix
-    #     cd ~/.dracula-themes
-    # else
-    #     echo "VS Code theme already installed. Continuing..."
-    # fi
 
     HAS_DRACULA_FZF_ZSHRC_CONFIG=$(is_config_in_zshrc dracula-fzf)
 

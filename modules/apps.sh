@@ -1,8 +1,5 @@
 #!/usr/bin/env zsh
 
-# deps:
-#   - none
-
 function setup_apps() {
     source ./common.sh
 
