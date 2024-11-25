@@ -12,7 +12,7 @@ function setup_python() {
     if [[ $HAS_PYENV_ZSHRC_CONFIG -eq 1 ]]; then
         echo "Writing .zshrc pyenv configuration..."
 
-        cat <<'EOF' >> ~/.zshrc
+        cat <<'EOF' >>~/.zshrc
 
 ### BEGIN_CONF pyenv
 
@@ -26,9 +26,9 @@ EOF
         echo ".zshrc pyenv configuration present. Continuing..."
     fi
 
-    GLOBAL_VERSION_SET=$(pyenv global | grep $PYTHON_VERSION > /dev/null 2>&1 && echo 0 || echo 1)
+    GLOBAL_VERSION_SET=$(pyenv global | grep $PYTHON_VERSION >/dev/null 2>&1 && echo 0 || echo 1)
 
-    if [ $GLOBAL_VERSION_SET -eq 0 ];then
+    if [ $GLOBAL_VERSION_SET -eq 0 ]; then
         echo "Global pyenv version set to '$PYTHON_VERSION'. Continuing..."
     else
         echo "Installing global pyenv version..."
@@ -43,7 +43,7 @@ EOF
     )
 
     for PACKAGE in "${PIP_PACKAGES[@]}"; do
-        PACKAGE_IS_INSTALLED=$(pip show $PACKAGE > /dev/null 2>&1 && echo 0 || echo 1)
+        PACKAGE_IS_INSTALLED=$(pip show $PACKAGE >/dev/null 2>&1 && echo 0 || echo 1)
 
         if [[ $PACKAGE_IS_INSTALLED -eq 0 ]]; then
             echo "$PACKAGE is installed. Continuing..."

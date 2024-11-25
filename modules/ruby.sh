@@ -7,34 +7,36 @@ function setup_ruby() {
 
     attempt_brew_install rbenv
 
-    rbenv install $RUBY_VERSION
+    HAS_RBENV_ZSHRC_CONFIG=$(is_config_in_zshrc rbenv)
 
-#     HAS_PYENV_ZSHRC_CONFIG=$(is_config_in_zshrc pyenv)
+    if [[ $HAS_RBENV_ZSHRC_CONFIG -eq 1 ]]; then
+        echo "Writing .zshrc rbenv configuration..."
 
-#     if [[ $HAS_PYENV_ZSHRC_CONFIG -eq 1 ]]; then
-#         echo "Writing .zshrc pyenv configuration..."
+        cat <<'EOF' >>~/.zshrc
 
-#         cat <<'EOF' >> ~/.zshrc
+### BEGIN_CONF rbenv
 
-# ### BEGIN_CONF pyenv
+eval "$(rbenv init - --no-rehash zsh)"
 
-# export PYENV_ROOT="$HOME/.pyenv"
-# [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-# eval "$(pyenv init -)"
+### END_CONF rbenv
+EOF
+    else
+        echo ".zshrc rbenv configuration present. Continuing..."
+    fi
 
-# ### END_CONF pyenv
-# EOF
-#     else
-#         echo ".zshrc pyenv configuration present. Continuing..."
-#     fiwh
+    RUBY_IS_INSTALLED=$(rbenv versions | grep $RUBY_VERSION >/dev/null 2>&1 && echo 0 || echo 1)
+    if [[ $RUBY_IS_INSTALLED -ne 0 ]]; then
+        echo "Installing ruby $RUBY_VERSION..."
+        rbenv install $RUBY_VERSION
+    else
+        echo "Ruby $RUBY_VERSION is installed. Continuing..."
+    fi
 
-#     GLOBAL_VERSION_SET=$(pyenv global | grep $PYTHON_VERSION > /dev/null 2>&1 && echo 0 || echo 1)
-
-#     if [ $GLOBAL_VERSION_SET -eq 0 ];then
-#         echo "Global pyenv version set to '$PYTHON_VERSION'. Continuing..."
-#     else
-#         echo "Installing global pyenv version..."
-#         pyenv install $PYTHON_VERSION
-#         pyenv global $PYTHON_VERSION
-#     fi 
+    RUBY_IS_GLOBAL=$(rbenv global | grep $RUBY_VERSION >/dev/null 2>&1 && echo 0 || echo 1)
+    if [[ $RUBY_IS_GLOBAL -ne 0 ]]; then
+        echo "Setting ruby $RUBY_VERSION to global version..."
+        rbenv global $RUBY_VERSION
+    else
+        echo "Ruby $RUBY_VERSION is global version. Continuing..."
+    fi
 }

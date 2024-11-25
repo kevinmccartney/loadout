@@ -155,7 +155,7 @@
         },
         {
           "background": "p:selection",
-          "foreground": "p:fg",
+          "foreground": "p:bg",
           "leading_diamond": "\ue0b2",
           "properties": {
             "time_format": "15:04:05"
