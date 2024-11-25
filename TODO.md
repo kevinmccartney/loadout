@@ -2,18 +2,13 @@
 
 ## Now
 
-- [ ] VS Code setup
-- [ ] Set up chrome extensions
-
-## Next
-
 - [ ] try asdf
 - [ ] Refactor scripts
 - [ ] Standardized logging
 - [ ] Colors
 - [ ] Verbose mode
 
-## Soon
+## Next
 
 - [ ] colorized more/less
 - [ ] setup zsh alias-finder to print after command
@@ -21,6 +16,8 @@
   - https://github.com/dandavison/delta
   - `git config --global set core.pager delta`
 - [ ] Random unsplash photo desktop
+- [ ] Keep items in dock
+  - https://www.tweaking4all.com/forum/macos-x-software/macos-programmatically-add-an-application-persistent-to-the-dock/
 
 ## Later
 
@@ -44,3 +41,5 @@
 - [x] More Dracula themes
 - [x] Install AppMap via VS Code
 - [x] Set up copilot
+- [x] VS Code setup
+- [x] Set up chrome extension manual process

@@ -18,6 +18,6 @@ source ./vscode.sh
 # setup_ruby
 # setup_dotnet
 # setup_go
-# setup_apps
+setup_apps
 # setup_dracula
-setup_vscode
+# setup_vscode

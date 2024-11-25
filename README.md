@@ -57,3 +57,4 @@ source ~/.zshrc
 - It will ask for sudo.
 - The default browser switch to chrome requires you click a dialog box
 - You will need to restart the machine to apply the key repeat settings
+- You will need to restart Chrome after installing extensions

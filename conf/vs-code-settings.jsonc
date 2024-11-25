@@ -1,0 +1,156 @@
+{
+  "[css]": {
+    "editor.suggest.insertMode": "replace"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "[shellscript]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform"
+  },
+  "accessibility.signals.terminalBell": {
+    "sound": "on"
+  },
+  "application.shellEnvironmentResolutionTimeout": 30,
+  "breadcrumbs.enabled": false,
+  "cSpell.logLevel": "Warning",
+  "codemetrics.nodeconfiguration.IfWithElseStatement": 1,
+  "debug.console.acceptSuggestionOnEnter": "on",
+  "debug.toolBarLocation": "docked",
+  "diffEditor.codeLens": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "editor.acceptSuggestionOnEnter": "off",
+  "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.cursorBlinking": "phase",
+  "editor.cursorStyle": "block",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.fontFamily": "'FiraCode Nerd Font', Monaco, 'Courier New', monospace",
+  "editor.fontLigatures": false,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.lineNumbers": "on",
+  "editor.linkedEditing": true,
+  "editor.minimap.enabled": false,
+  "editor.renderWhitespace": "all",
+  "editor.rulers": [
+    {
+      "color": "#FF79C6",
+      "column": 88
+    } // Dracula pink
+  ],
+  "editor.scrollBeyondLastLine": false,
+  "editor.suggest.localityBonus": true,
+  "editor.suggestSelection": "first",
+  "editor.tabCompletion": "on",
+  "editor.tabSize": 2,
+  "eslint.format.enable": true,
+  "explorer.autoReveal": false,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.decorations.badges": true,
+  "explorer.fileNesting.enabled": false,
+  "files.autoSave": "onWindowChange",
+  "files.exclude": {
+    "**/.git": false
+  },
+  "git.allowNoVerifyCommit": false,
+  "git.autofetch": true,
+  "git.closeDiffOnOperation": true,
+  "git.enableSmartCommit": false,
+  "git.pruneOnFetch": true,
+  "git.suggestSmartCommit": false,
+  "gitlens.plusFeatures.enabled": false,
+  "gremlins.showInProblemPane": true,
+  "html.format.enable": false,
+  "indentRainbow.colors": [
+    "rgba(139, 233, 253, 0.7)", // Dracula Cyan
+    "rgba(80, 250, 123, 0.7)", // Dracula Green
+    "rgba(255, 184, 108, 0.7)", // Dracula Orange
+    "rgba(255, 121, 198, 0.7)", // Dracula Pink
+    "rgba(189, 147, 249, 0.7)", // Dracula Purple
+    "rgba(255, 85, 85, 0.7)", // Dracula Red
+    "rgba(241, 250, 140, 0.7)" // Dracula Yellow
+  ],
+  "indentRainbow.includedLanguages": ["python"],
+  "javascript.format.enable": false,
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.referencesCodeLens.enabled": true,
+  "javascript.referencesCodeLens.showOnAllFunctions": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "json.format.enable": false,
+  "markdown.extension.italic.indicator": "_",
+  "markdown.extension.print.theme": "dark",
+  "material-icon-theme.activeIconPack": "react_redux",
+  "peacock.favoriteColors": [
+    {
+      "name": "Dracula Cyan",
+      "value": "#8BE9FD"
+    },
+    {
+      "name": "Dracula Green",
+      "value": "#50FA7B"
+    },
+    {
+      "name": "Dracula Orange",
+      "value": "#FFB86C"
+    },
+    {
+      "name": "Dracula Pink",
+      "value": "#FF79C6"
+    },
+    {
+      "name": "Dracula Purple",
+      "value": "#BD93F9"
+    },
+    {
+      "name": "Dracula Red",
+      "value": "#FF5555"
+    },
+    {
+      "name": "Dracula Yellow",
+      "value": "#F1FA8C"
+    }
+  ],
+  "peacock.surpriseMeFromFavoritesOnly": true,
+  "peacock.surpriseMeOnStartup": true,
+  "prettier.useEditorConfig": false,
+  "scm.alwaysShowActions": false,
+  "stylelint.enable": true,
+  "tailwindCSS.validate": true,
+  "terminal.external.osxExec": "iTerm.app",
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.enableVisualBell": true,
+  "terminal.integrated.fontFamily": "'FiraCode Nerd Font', Monaco, 'Courier New', monospace",
+  "terminal.integrated.tabs.enabled": false,
+  "terraform.codelens.referenceCount": true,
+  "terraform.experimentalFeatures.validateOnSave": true,
+  "terraform.languageServer.enable": true,
+  "terraform.languageServer.terraform.path": "/opt/homebrew/bin/terraform",
+  "todo-tree.highlights.backgroundColourScheme": [
+    "#FF5555", // Dracula Red
+    "#FFB86C", // Dracula Orange
+    "#F1FA8C", // Dracula Yellow
+    "#50FA7B", // Dracula Green
+    "#8BE9FD", // Dracula Cyan
+    "#FF79C6", // Dracula Pink
+    "#BD93F9" // Dracula Purple
+  ],
+  "todo-tree.tree.buttons.scanMode": true,
+  "todo-tree.tree.showCountsInTree": true,
+  "typescript.format.enable": false,
+  "typescript.implementationsCodeLens.enabled": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.referencesCodeLens.enabled": true,
+  "typescript.suggest.completeFunctionCalls": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "vscode-pets.petSize": "medium",
+  "vscode-pets.theme": "forest",
+  "workbench.colorTheme": "Dracula Theme",
+  "workbench.iconTheme": "material-icon-theme"
+}
