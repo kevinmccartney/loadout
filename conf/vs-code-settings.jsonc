@@ -117,8 +117,6 @@
       "value": "#F1FA8C"
     }
   ],
-  "peacock.surpriseMeFromFavoritesOnly": true,
-  "peacock.surpriseMeOnStartup": true,
   "prettier.useEditorConfig": false,
   "scm.alwaysShowActions": false,
   "stylelint.enable": true,
@@ -152,5 +150,8 @@
   "vscode-pets.petSize": "medium",
   "vscode-pets.theme": "forest",
   "workbench.colorTheme": "Dracula Theme",
-  "workbench.iconTheme": "material-icon-theme"
+  "workbench.iconTheme": "material-icon-theme",
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  }
 }

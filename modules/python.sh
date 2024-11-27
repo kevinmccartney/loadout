@@ -3,37 +3,33 @@
 PYTHON_VERSION=3.13.0
 
 function setup_python() {
-    source ./common.sh
+    local module_name="python"
 
-    attempt_brew_install pyenv
+    source "${MODULES_DIR}/common.sh"
 
-    HAS_PYENV_ZSHRC_CONFIG=$(is_config_in_zshrc pyenv)
+    log_info "Setting up $module_name..." $module_name
 
-    if [[ $HAS_PYENV_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc pyenv configuration..."
+    attempt_brew_install pyenv $module_name
 
-        cat <<'EOF' >>~/.zshrc
-
-### BEGIN_CONF pyenv
-
+    local pyenv_zshrc_content=$(
+        cat <<EOF
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
-
-### END_CONF pyenv
 EOF
-    else
-        echo ".zshrc pyenv configuration present. Continuing..."
-    fi
+    )
+    ensure_config_section pyenv ~/.zshrc "$pyenv_zshrc_content" $module_name
 
-    GLOBAL_VERSION_SET=$(pyenv global | grep $PYTHON_VERSION >/dev/null 2>&1 && echo 0 || echo 1)
+    # make sure the global pyenv version is correct
+    pyenv global | run_silent "grep $PYTHON_VERSION"
 
-    if [ $GLOBAL_VERSION_SET -eq 0 ]; then
-        echo "Global pyenv version set to '$PYTHON_VERSION'. Continuing..."
-    else
-        echo "Installing global pyenv version..."
+    if [ $? -ne 0 ]; then
+        log_info "Installing $(clr_cyan 'global pyenv python version') to $(clr_cyan $PYTHON_VERSION)..." $module_name
         pyenv install $PYTHON_VERSION
         pyenv global $PYTHON_VERSION
+
+    else
+        log_info "$(clr_cyan 'global pyenv python version') set to $(clr_cyan $PYTHON_VERSION). $(clr_bright 'Continuing...')" $module_name
     fi
 
     PIP_PACKAGES=(
@@ -43,13 +39,15 @@ EOF
     )
 
     for PACKAGE in "${PIP_PACKAGES[@]}"; do
-        PACKAGE_IS_INSTALLED=$(pip show $PACKAGE >/dev/null 2>&1 && echo 0 || echo 1)
+        run_silent "pip show $PACKAGE"
 
-        if [[ $PACKAGE_IS_INSTALLED -eq 0 ]]; then
-            echo "$PACKAGE is installed. Continuing..."
-        else
-            echo "Installing $PACKAGE..."
+        if [[ $? -ne 0 ]]; then
+            log_info "Installing pip package $(clr_cyan $PACKAGE)..." $module_name
             pip install $PACKAGE
+        else
+            log_info "Pip package $(clr_cyan $PACKAGE) is installed. $(clr_bright 'Continuing...')" $module_name
         fi
     done
+
+    log_info "$(clr_green "$module_name setup complete")" $module_name
 }

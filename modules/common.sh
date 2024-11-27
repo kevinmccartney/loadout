@@ -1,57 +1,67 @@
 #!/usr/bin/env zsh
 
-# Pass in a formula/cask name to get it's install status
-#   $1 PROGRAM (string): The name of the program to check
-#   Return: 0 or 1 to be treated as a bool
-function is_brew_installed() {
-    PROGRAM=$1
-    brew list $PROGRAM >/dev/null 2>&1
+#
+# Logging
+#
 
-    NVM_IS_INSTALLED=$?
+LOG_INFO_TAG="[$(clr_blue 'INFO')]"
 
-    if [[ $NVM_IS_INSTALLED -eq 0 ]]; then
-        echo 0
-    else
-        echo 1
-    fi
+function get_module_tag() {
+    local module=$1
+
+    echo "$(clr_magenta $module):"
 }
 
-# Attempt to install a program using homebrew
-#   $1 PROGRAM(string): The name of the program to install
-#   $2 IS_FORMULA (integer)?: OPTIONIAL - Treated as bool to indicate if the program is a formula (if false, the program will be treated as a cask)
-#   Return: void
-function attempt_brew_install() {
-    PROGRAM=$1
-    IS_FORMULA=${2:-0}
-    IS_INSTALLED=$(is_brew_installed $PROGRAM)
+function log_info() {
+    local message=$1
+    local module_name=$2
 
-    if [ $IS_INSTALLED -eq 0 ]; then
-        echo "$PROGRAM is installed. Continuing..."
+    echo "$LOG_INFO_TAG $(get_module_tag $module_name) $message"
+}
+
+#
+# brew helpers
+#
+function is_brew_installed() {
+    local program=$1
+
+    run_silent "brew list $program"
+
+    return $?
+}
+
+function attempt_brew_install() {
+    local program=$1
+    local module=$2
+    local is_formula=${3:-0}
+
+    is_brew_installed $program
+
+    if [ $? -eq 0 ]; then
+        log_info "$(clr_cyan $program) is installed. $(clr_bright 'Continuing...')" $module
     else
-        echo "Installing $PROGRAM..."
-        if [ $IS_FORMULA -eq 0 ]; then
-            brew install $PROGRAM
+        log_info "Installing $(clr_cyan program)..." $module
+        if [ $is_formula -eq 0 ]; then
+            brew install $program
         else
-            brew install --cask $PROGRAM
+            brew install --cask $program
         fi
     fi
+
+    return 0
 }
 
-# Check if a config group blcok is in your .zshrc
-#   $1 CONFIG_GROUP_NAME(string): The name of the config block to look for
-#   Return: Return: 0 or 1 to be treated as a bool
-function is_config_in_zshrc() {
-    CONFIG_GROUP_NAME=$1
-    NVM_ZSHRC_CONFIG_ENTRIES=$(
-        ggrep -Pzo "(?s)### BEGIN_CONF $CONFIG_GROUP_NAME.*### END_CONF $CONFIG_GROUP_NAME" ~/.zshrc |
-            tr -d '\0' # make sure to trim null bytes to avoid bash warnings
-    )
+#
+# File helpers
+#
+function ensure_file() {
+    local file=$1
 
-    if [[ -z $NVM_ZSHRC_CONFIG_ENTRIES ]]; then
-        echo 1
-    else
-        echo 0
+    if [ ! -f $file ]; then
+        touch $file
     fi
+
+    return 0
 }
 
 function ensure_dir() {
@@ -60,29 +70,58 @@ function ensure_dir() {
     if [[ ! -d $DIRNAME ]]; then
         mkdir -p $DIR_NAME
     fi
+
+    return 0
 }
 
-function is_pattern_in_file() {
-    PATTERN=$1
-    FILE_PATH=$2
-    RESULTS=$(
-        ggrep -Pzo "$1" $2 |
+function regex_exists_in_file() {
+    local text=$1
+    local file=$2
+
+    local config_section=$(
+        ggrep -Pzo "$text" $file |
             tr -d '\0' # make sure to trim null bytes to avoid bash warnings
     )
 
-    if [[ -z $RESULTS ]]; then
-        echo 1
+    if [[ ! -z $config_section ]]; then
+        return 0
     else
-        echo 0
+        return 1
     fi
 }
 
-# function to_bool() {
-#     COMMAND=$1
+function ensure_config_section() {
+    local config_section_name=$1
+    local config_file=$2
+    local config_section_content=$3
+    local module_name=$4
+    local comment_character=${5:-'#'}
+    local comment_block=$(printf "%3s" | tr ' ' "$comment_character")
 
-#     if [[ -z $COMMAND ]]; then
-#         echo 3
-#     else
-#         eval $COMMAND
-#     fi
-# }
+    local reg="(?s)${comment_block} BEGIN_CONF ${config_section_name}.*${comment_block} END_CONF ${config_section_name}"
+
+    if ! regex_exists_in_file "$reg" "$config_file"; then
+        log_info "Writing $(clr_cyan $config_section_name) configuration in $(clr_cyan $config_file)..." $module_name
+        echo "" >>$config_file
+        echo "${comment_block} BEGIN_CONF $config_section_name" >>$config_file
+        echo "" >>$config_file
+        echo "$config_section_content" >>$config_file
+        echo "" >>$config_file
+        echo "${comment_block} END_CONF $config_section_name" >>$config_file
+    else
+        log_info "$(clr_cyan $config_section_name) configuration in $(clr_cyan $config_file) present. $(clr_bright 'Continuing...')" $module_name
+    fi
+
+    return 0
+}
+
+#
+# Command helpers
+#
+function run_silent() {
+    local command=$1
+
+    eval $command >/dev/null 2>&1
+
+    return $?
+}

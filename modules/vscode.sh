@@ -61,23 +61,27 @@ EXTENSIONS=(
 )
 
 setup_vscode() {
-    source ./common.sh
+    local module_name="vscode"
+
+    source "${MODULES_DIR}/common.sh"
+
+    log_info "Setting up $module_name..." $module_name
 
     INSTALLED_EXTENSIONS=$(code --list-extensions)
 
     for EXTENSION in "${EXTENSIONS[@]}"; do
-        EXTENSION_RESULT=$(echo $INSTALLED_EXTENSIONS | ggrep -Pzo $EXTENSION)
+        EXTENSION_RESULT=$(echo $INSTALLED_EXTENSIONS | ggrep -Pzo $EXTENSION | tr -d '\0')
 
         if [[ -z $EXTENSION_RESULT ]]; then
-            echo "Installing $EXTENSION VS Code plugin..."
+            log_info "Installing $(clr_cyan $EXTENSION) VS Code plugin..." $module_name
             code --install-extension $EXTENSION
         else
-            echo "$EXTENSION VS Code plugin is already installed. Continuing..."
+            log_info "$(clr_cyan $EXTENSION) VS Code plugin is already installed. $(clr_bright 'Continuing...')" $module_name
         fi
     done
 
-    echo "VS Code plugins installed successfully."
+    log_info "Copying $(clr_cyan 'VS Code settings')..." $module_name
+    cp -f conf/vs-code-settings.jsonc $HOME/Library/Application\ Support/Code/User/settings.json
 
-    echo "Copying VS Code settings..."
-    cp -f ../conf/vs-code-settings.jsonc $HOME/Library/Application\ Support/Code/User/settings.json
+    log_info "$(clr_green "$module_name setup complete")" $module_name
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-APPS=(
+DRACULA_THEMES=(
     'iterm'
     'git'
     'pygments'
@@ -8,129 +8,54 @@ APPS=(
     'vim'
 )
 
-PYTHON_VERSION=3.13.0
+function link_dracula_theme() {
+    local theme_name=$1
+    local source_path=$2
+    local dest_path=$3
+    local module=$4
+
+    if [[ -L $dest_path ]]; then
+        log_info "Dracula $(clr_cyan "$theme_name") theme already linked. $(clr_bright 'Continuing...')" $module_name
+    else
+        log_info "Linking dracula $(clr_cyan "$theme_name") theme..." $module_name
+        ensure_dir $(dirname $dest_path)
+        ln -s $source_path $dest_path
+    fi
+}
 
 function setup_dracula() {
-    source ./common.sh
+    local module_name="dracula"
 
-    if [ -d ~/.dracula-themes ]; then
-        echo "'~/.dracula-themes' exists. Continuing..."
-        cd ~/.dracula-themes
-    else
-        echo "Creating '~/.dracula-themes'..."
-        mkdir ~/.dracula-themes
-    fi
+    source "${MODULES_DIR}/common.sh"
 
-    for element in "${APPS[@]}"; do
-        if [ ! -d ~/.dracula-themes/$element ]; then
-            echo "Installing $element theme..."
-            git clone https://github.com/dracula/$element.git
+    log_info "Setting up $module_name..." $module_name
+
+    ensure_dir ~/.dracula-themes
+
+    for theme in "${DRACULA_THEMES[@]}"; do
+        if [ ! -d ~/.dracula-themes/$theme ]; then
+            log_info "Downloading Dracula $(clr_cyan "$theme") theme..." $module_name
+            git clone https://github.com/dracula/$theme.git ~/.dracula-themes/$theme
         else
-            echo "$element theme already installed. Continuing..."
+            log_info "Dracula $(clr_cyan $theme) theme already exists. $(clr_bright 'Continuing...')" $module_name
         fi
-
     done
 
-    HAS_DRACULA_FZF_ZSHRC_CONFIG=$(is_config_in_zshrc dracula-fzf)
-
-    if [[ $HAS_DRACULA_FZF_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc dracula-fzf configuration..."
-
-        cat <<EOF >>~/.zshrc
-
-### BEGIN_CONF dracula-fzf
-
-export FZF_DEFAULT_OPTS='--color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'
-
-### END_CONF dracula-fzf
-EOF
+    if [ ! -d ~/.dracula-themes/eza ]; then
+        log_info "Downloading Dracula $(clr_cyan 'eza') theme..." $module_name
+        git clone https://github.com/eza-community/eza-themes.git ~/.dracula-themes/eza
     else
-        echo ".zshrc dracula-fzf configuration present. Continuing..."
+        log_info "Dracula $(clr_cyan 'eza') theme already exists. $(clr_bright 'Continuing...')" $module_name
     fi
 
-    GIT_CONFIG_HAS_DRACULA_CONFIG=$(
-        ggrep -Pzo "(?s)### BEGIN_CONF dracula-git.*### END_CONF dracula-git" ~/.gitconfig |
-            tr -d '\0' # make sure to trim null bytes to avoid bash warnings
-    )
+    link_dracula_theme eza ~/.dracula-themes/eza ~/.config/eza/theme.yml $module_name
 
-    if [[ -z $GIT_CONFIG_HAS_DRACULA_CONFIG ]]; then
-        echo "Installing dracula git theme..."
-
-        cat <<EOF >>~/.gitconfig
-
-### BEGIN_CONF dracula-git
-
-$(echo "$DRACULA_GIT_THEME_CONTENTS")
-
-### END_CONF dracula-git
-EOF
-    else
-        echo "Dracula git theme installed. Continuing..."
-    fi
-
-    # TODO = this is brittle & will break if the python version
     SITE_PACKAGES_PATH=$(python -m site | ggrep "$PYENV_ROOT/versions/.*/lib/python.*/site-packages" | tr -d "'" | tr -d ',' | xargs)
 
-    if [[ ! -f $SITE_PACKAGES_PATH/pygments/styles/dracula.py ]]; then
-        echo "Copying pygments dracula theme..."
-        cp ~/.dracula-themes/pygments/dracula.py "$SITE_PACKAGES_PATH/pygments/styles"
-    else
-        echo "Pygments dracula theme is present. Continuing..."
-    fi
+    link_dracula_theme pygments ~/.dracula-themes/pygments/dracula.py $SITE_PACKAGES_PATH/pygments/styles/dracula.py $module_name
 
-    if [ ! -d ~/.dracula-themes/eza ]; then
-        echo "Installing eza theme..."
-        git clone https://github.com/eza-community/eza-themes.git eza
-        mkdir -p ~/.config/eza
-        ln -sf "$(pwd)/eza/themes/dracula.yml" ~/.config/eza/theme.yml
-    else
-        echo "eza theme already present. Continuing..."
-    fi
-
-    HAS_DRACULA_EZA_ZSHRC_CONFIG=$(is_config_in_zshrc dracula-eza)
-    if [[ -z $HAS_DRACULA_EZA_ZSHRC_CONFIG ]]; then
-        echo "Writing .zshrc dracula-eza configuration"
-
-        cat <<EOF >>~/.gitconfig
-
-### BEGIN_CONF dracula-eza
-
-export EZA_CONFIG_DIR=~/.config/eza
-
-### END_CONF dracula-eza
-EOF
-    else
-        echo ".zshrc dracula-eza configuration present. Continuing..."
-    fi
-
-    HAS_DRACULA_ZSH_SYNTAX_HIGHLIGHTING_ZSHRC_CONFIG=$(is_config_in_zshrc dracula-zsh-syntax-highlighting)
-    if [[ $HAS_DRACULA_ZSH_SYNTAX_HIGHLIGHTING_ZSHRC_CONFIG -ne 0 ]]; then
-        echo "Writing .zshrc dracula-zsh-syntax-highlighting configuration"
-
-        cat <<EOF >>~/.zshrc
-
-### BEGIN_CONF dracula-zsh-syntax-highlighting
-
-source ~/.dracula-themes/zsh-syntax-highlighting/zsh-syntax-highlighting.sh
-
-### END_CONF dracula-zsh-syntax-highlighting
-EOF
-    else
-        echo ".zshrc dracula-zsh-syntax-highlighting configuration present. Continuing..."
-    fi
-
-    ensure_dir ~/.vim/pack/themes/start
-    ln -s ~/.dracula-themes/vim ~/.vim/pack/themes/start/dracula
-
-    VIMRC_HAS_DRACULA_CONFIG=$(is_pattern_in_file '(?s)""" BEGIN_CONF dracula-vim.*""" END_CONF dracula-vim' ~/.vimrc)
-    echo $VIMRC_HAS_DRACULA_CONFIG
-    if [[ $VIMRC_HAS_DRACULA_CONFIG -ne 0 ]]; then
-        echo "Writing .vimrc dracula-vim configuration"
-
-        cat <<EOF >>~/.vimrc
-
-""" BEGIN_CONF dracula-vim
-
+    local dracula_vimrc_content=$(
+        cat <<EOF
 if v:version < 802
     packadd! dracula
 endif
@@ -138,14 +63,28 @@ endif
 colorscheme dracula
 syntax enable
 set number
-
-""" END_CONF dracula-vim
 EOF
-    else
-        echo ".vimrc dracula-vim configuration present. Continuing..."
-    fi
+    )
+    ensure_config_section dracula-vim ~/.vimrc "$dracula_vimrc_content" $module_name '"'
+    ensure_config_section dracula-zsh-syntax-highlighting \
+        ~/.zshrc \
+        'source ~/.dracula-themes/zsh-syntax-highlighting/zsh-syntax-highlighting.sh' \
+        $module_name
+    ensure_config_section dracula-eza \
+        ~/.zshrc \
+        'export EZA_CONFIG_DIR=~/.config/eza' \
+        $module_name
 
-    echo "Dracula themes install complete"
+    local dracula_gitconfig_content=$(cat ~/.dracula-themes/git/config/gitconfig)
 
-    # TODO: cd back home?
+    ensure_config_section dracula-git \
+        ~/.gitconfig \
+        "$dracula_gitconfig_content" \
+        $module_name
+    ensure_config_section dracula-fzf \
+        ~/.zshrc \
+        "export FZF_DEFAULT_OPTS='--color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'" \
+        $module_name
+
+    log_info "$(clr_green "$module_name setup complete")" $module_name
 }

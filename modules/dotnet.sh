@@ -1,23 +1,29 @@
 #!/usr/bin/env zsh
 
-DOTNET_VERSIONS=(
+dotnet_versions=(
     'dotnet-sdk8'
     'dotnet-sdk9'
 )
 
 function setup_dotnet() {
-    source ./common.sh
+    local module_name="dotnet"
 
-    DOTNET_SDK_VERSIONS_IS_TAPPED=$(brew tap | grep 'isen-ng/dotnet-sdk-versions' >/dev/null 2>&1 && echo 0 || echo 1)
+    source "${MODULES_DIR}/common.sh"
 
-    if [[ $DOTNET_SDK_VERSIONS_IS_TAPPED -ne 0 ]]; then
-        echo "Tapping 'isen-ng/dotnet-sdk-versions'..."
+    log_info "Setting up $module_name..." $module_name
+
+    brew tap | run_silent "grep 'isen-ng/dotnet-sdk-versions'"
+
+    if [[ $? -ne 0 ]]; then
+        log_info "Tapping $(clr_cyan 'isen-ng/dotnet-sdk-versions')..." $module_name
         brew tap isen-ng/dotnet-sdk-versions
     else
-        echo "'isen-ng/dotnet-sdk-versions' is tapped. Continuing..."
+        log_info "$(clr_cyan 'isen-ng/dotnet-sdk-versions') is tapped. $(clr_bright 'Continuing...')" $module_name
     fi
 
-    for VERSION in "${DOTNET_VERSIONS[@]}"; do
-        attempt_brew_install $VERSION 1
+    for version in "${dotnet_versions[@]}"; do
+        attempt_brew_install $version $module_name 1
     done
+
+    log_info "$(clr_green "$module_name setup complete")" $module_name
 }

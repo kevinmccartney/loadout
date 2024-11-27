@@ -3,40 +3,32 @@
 RUBY_VERSION=3.3.6
 
 function setup_ruby() {
-    source ./common.sh
+    local module_name="ruby"
 
-    attempt_brew_install rbenv
+    source "${MODULES_DIR}/common.sh"
 
-    HAS_RBENV_ZSHRC_CONFIG=$(is_config_in_zshrc rbenv)
+    log_info "Setting up $module_name..." $module_name
 
-    if [[ $HAS_RBENV_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc rbenv configuration..."
+    attempt_brew_install rbenv $module_name
 
-        cat <<'EOF' >>~/.zshrc
-
-### BEGIN_CONF rbenv
-
-eval "$(rbenv init - --no-rehash zsh)"
-
-### END_CONF rbenv
-EOF
-    else
-        echo ".zshrc rbenv configuration present. Continuing..."
-    fi
+    ensure_config_section $module_name \
+        ~/.zshrc \
+        'eval "$(rbenv init - --no-rehash zsh)"' \
+        $module_name
 
     RUBY_IS_INSTALLED=$(rbenv versions | grep $RUBY_VERSION >/dev/null 2>&1 && echo 0 || echo 1)
     if [[ $RUBY_IS_INSTALLED -ne 0 ]]; then
-        echo "Installing ruby $RUBY_VERSION..."
+        log_info "Installing $(clr_cyan "ruby ${RUBY_VERSION}...")" $module_name
         rbenv install $RUBY_VERSION
     else
-        echo "Ruby $RUBY_VERSION is installed. Continuing..."
+        log_info "$(clr_cyan "Ruby $RUBY_VERSION") is installed. $(clr_bright 'Continuing...')" $module_name
     fi
 
     RUBY_IS_GLOBAL=$(rbenv global | grep $RUBY_VERSION >/dev/null 2>&1 && echo 0 || echo 1)
     if [[ $RUBY_IS_GLOBAL -ne 0 ]]; then
-        echo "Setting ruby $RUBY_VERSION to global version..."
+        log_info "Setting $(clr_cyan "ruby $RUBY_VERSION") to global version..." $module_name
         rbenv global $RUBY_VERSION
     else
-        echo "Ruby $RUBY_VERSION is global version. Continuing..."
+        log_info "$(clr_cyan "Ruby $RUBY_VERSION") is global version. $(clr_bright 'Continuing...')" $module_name
     fi
 }

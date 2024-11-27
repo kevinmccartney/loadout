@@ -4,7 +4,11 @@
 #   - apps
 
 function setup_tty() {
-    source ./common.sh
+    local module_name="tty"
+
+    source "${MODULES_DIR}/common.sh"
+
+    log_info "Setting up $module_name..." $module_name
 
     FORMULAS=(
         'antigen'
@@ -15,35 +19,20 @@ function setup_tty() {
     )
 
     for FORMULA in "${FORMULAS[@]}"; do
-        attempt_brew_install $FORMULA
+        attempt_brew_install $FORMULA $module_name
     done
 
     for CASK in "${CASKS[@]}"; do
-        attempt_brew_install $CASK 1
+        attempt_brew_install $CASK $module_name 1
     done
 
-    if [ ! -f ~/.zshrc ]; then
-        echo "Creating '~/.zshrc'..."
-        touch ~/.zshrc
-    else
-        echo "'~/.zshrc' exists. Continuing..."
-    fi
-
-    if [ ! -f ~/.antigenrc ]; then
-        echo "Creating '~/.antigenrc'..."
-        touch ~/.antigenrc
-    else
-        echo "'~/.antigenrc' exists. Continuing..."
-    fi
+    ensure_file ~/.zshrc
+    ensure_file ~/.antigenrc
 
     # /opt/homebrew/Cellar/antigen/2.2.3/share/antigen/antigen.zsh
     ANTIGEN_PATH=$(brew list antigen | grep antigen.zsh)
 
-    HAS_ANTIGEN_ZSHRC_CONFIG=$(is_config_in_zshrc antigen)
-
-    if [[ $HAS_ANTIGEN_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc antigen configuration..."
-
+    local antigen_zshrc_content=$(
         cat <<EOF >>~/.zshrc
 
 ### BEGIN_CONF antigen
@@ -55,11 +44,11 @@ antigen init ~/.antigenrc
 
 ### END_CONF antigen
 EOF
-    else
-        echo ".zshrc antigen configuration present. Continuing..."
-    fi
+    )
 
-    echo "Writing antigen configuration..."
+    ensure_config_section antigen ~/.zshrc "$antigen_zshrc_content" $module_name
+
+    log_info "Writing $(clr_cyan 'antigen') configuration to $(clr_cyan '~/.antigenrc')..." $module_name
 
     cat <<EOF >~/.antigenrc
 # Load oh-my-zsh library.
@@ -94,42 +83,28 @@ antigen apply
 EOF
 
     if [[ ! -f ~/.kevops.omp.jsonc ]]; then
-        echo "Writing Oh My Posh configuration..."
-        cp ../conf/kevops.omp.jsonc ~/.kevops.omp.jsonc
+        log_info "Writing $(clr_cyan 'Oh My Posh') configuration to $(clr_cyan '~/kevops.omp.jsonc')..." $module_name
+        cp conf/kevops.omp.jsonc ~/.kevops.omp.jsonc
     else
-        echo "Oh My Posh configuration exists. Continuing..."
+        log_info "$(clr_cyan 'Oh My Posh') configuration exists. Continuing..." $module_name
     fi
 
-    HAS_OH_MY_POSH_ZSHRC_CONFIG=$(is_config_in_zshrc oh-my-posh)
-    if [[ $HAS_OH_MY_POSH_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc Oh My Posh configuration..."
+    ensure_config_section oh-my-posh \
+        ~/.zshrc \
+        'eval "$(oh-my-posh init zsh --config ~/.kevops.omp.jsonc)"' \
+        $module_name
 
-        cat <<'EOF' >>~/.zshrc
-
-### BEGIN_CONF oh-my-posh
-
-eval "$(oh-my-posh init zsh --config ~/.kevops.omp.jsonc)"
-
-### END_CONF oh-my-posh
-EOF
-    else
-        echo ".zshrc Oh MY Posh configuration present. Continuing..."
-    fi
-
-    HAS_ALIAS_FINDER_ZSHRC_CONFIG=$(is_config_in_zshrc alias-finder)
-    if [[ $HAS_ALIAS_FINDER_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc alias-finder configuration..."
-
-        cat <<'EOF' >>~/.zshrc
-
-### BEGIN_CONF alias-finder
-
-zstyle ':omz:plugins:alias-finder' autoload yes # disabled by default
+    local alias_finder_zshrc_content=$(
+        cat <<EOF
+zstyle :omz:plugins:alias-finder' autoload yes # disabled by default
 zstyle ':omz:plugins:alias-finder' cheaper yes # disabled by default
-
-### END_CONF alias-finder
 EOF
-    else
-        echo ".zshrc alias-finder configuration present. Continuing..."
-    fi
+    )
+
+    ensure_config_section alias-finder \
+        ~/.zshrc \
+        "$alias_finder_zshrc_content" \
+        $module_name
+
+    log_info "$(clr_green "$module_name setup complete")" $module_name
 }

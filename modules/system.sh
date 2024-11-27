@@ -1,29 +1,15 @@
 #!/usr/bin/env zsh
 
-# deps:
-#   - none
-
 function setup_system() {
-    source ./common.sh
+    local module_name="system"
 
-    HAS_BREW_ZSHRC_CONFIG=$(is_config_in_zshrc brew)
+    source "${MODULES_DIR}/common.sh"
 
-    if [[ $HAS_BREW_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc brew configuration..."
+    log_info "Setting up $module_name..." $module_name
 
-        cat <<'EOF' >>~/.zshrc
+    ensure_config_section brew ~/.zshrc 'eval "$(/opt/homebrew/bin/brew shellenv)"' $module_name
 
-### BEGIN_CONF brew
-
-eval "$(/opt/homebrew/bin/brew shellenv)"
-
-### END_CONF brew
-EOF
-    else
-        echo ".zshrc brew configuration present. Continuing..."
-    fi
-
-    FORMULAS=(
+    local formulas=(
         'git'
         'grep' # need this for GNU grep (ggrep)
         'jq'
@@ -62,85 +48,49 @@ EOF
         'pygments'
         'vim'
         'shfmt'
+        'openssh'
+        'miller'
+        'base64'
     )
 
-    for FORMULA in "${FORMULAS[@]}"; do
-        attempt_brew_install $FORMULA
+    for formula in "${formulas[@]}"; do
+        attempt_brew_install $formula $module_name
     done
 
-    LOOP_IS_TAPPED=$(brew tap | grep 'miserlou/loop' >/dev/null 2>&1 && echo 0 || echo 1)
+    brew tap | run_silent "grep 'miserlou/loop'"
 
-    if [[ $LOOP_IS_TAPPED -ne 0 ]]; then
-        echo "Tapping 'miserlou/loop'..."
+    if [[ $? -ne 0 ]]; then
+        log_info "Tapping $(clr_cyan 'miserlou/loop')..." $module_name
         brew tap miserlou/loop https://github.com/Miserlou/Loop.git
     else
-        echo "'miserlou/loop' is tapped. Continuing..."
+        log_info "$(clr_cyan 'miserlou/loop') is tapped. $(clr_bright 'Continuing...')" $module_name
     fi
 
-    LOOP_IS_INSTALLED=$(is_brew_installed loop)
-    if [ $LOOP_IS_INSTALLED -eq 0 ]; then
-        echo "loop is installed. Continuing..."
+    is_brew_installed loop
+
+    if [ $? -eq 0 ]; then
+        log_info "$(clr_cyan 'loop') is installed. $(clr_bright 'Continuing...')" $module_name
     else
-        echo "Installing loop..."
+        log_info "Installing $(clr_cyan 'loop')..." $module_name
         brew install loop --formula --HEAD
     fi
 
-    HAS_FZF_ZSHRC_CONFIG=$(is_config_in_zshrc fzf)
+    ensure_config_section fzf ~/.zshrc 'source <(fzf --zsh) # Set up fzf key bindings and fuzzy completion' $module_name
+    ensure_config_section thefuck ~/.zshrc 'eval $(thefuck --alias)' $module_name
 
-    if [[ $HAS_FZF_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc fzf configuration..."
-
-        cat <<EOF >>~/.zshrc
-
-### BEGIN_CONF fzf
-
-source <(fzf --zsh) # Set up fzf key bindings and fuzzy completion
-
-### END_CONF fzf
-EOF
-    else
-        echo ".zshrc fzf configuration present. Continuing..."
-    fi
-
-    HAS_THEFUCK_ZSHRC_CONFIG=$(is_config_in_zshrc thefuck)
-
-    if [[ $HAS_THEFUCK_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc thefuck configuration..."
-
-        # add instant mode support (need python 3) https://github.com/nvbn/thefuck?tab=readme-ov-file#experimental-instant-mode
-        cat <<'EOF' >>~/.zshrc
-
-### BEGIN_CONF thefuck
-
-eval $(thefuck --alias)
-
-### END_CONF thefuck
-EOF
-    else
-        echo ".zshrc thefuck configuration present. Continuing..."
-    fi
-
-    HAS_BAT_ZSHRC_CONFIG=$(is_config_in_zshrc bat)
-
-    if [[ $HAS_BAT_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc bat configuration..."
-
-        cat <<'EOF' >>~/.zshrc
-
-### BEGIN_CONF bat
-
+    local bat_zshrc_content=$(
+        cat <<'EOF'
 # use bat as the man page colorizer
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
 # setting help flags to use bat
 alias -g -- -h='-h 2>&1 | bat --language=help --style=plain'
 alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
-
-### END_CONF bat
 EOF
-    else
-        echo ".zshrc bat configuration present. Continuing..."
-    fi
+    )
+
+    ensure_config_section bat ~/.zshrc "$bat_zshrc_content" $module_name
+    ensure_config_section autoenv ~/.zshrc 'source $(brew --prefix autoenv)/activate.sh' $module_name
 
     # always show dotfiles in finder
     defaults write com.apple.finder AppleShowAllFiles -bool true
@@ -150,89 +100,61 @@ EOF
     # set theme to dark mode
     osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true'
 
-    CHROME_IS_DEFAULT_BROWSER=$(duti -d http | grep Chrome >/dev/null 2>&1 && duti -d https | grep Chrome >/dev/null 2>&1 && echo 0 || echo 1)
+    duti -d http | run_silent 'ggrep Chrome'
+    local chrome_is_http_browser=$?
+    duti -d https | run_silent 'ggrep Chrome'
+    local chrome_is_https_browser=$?
+    local chrome_is_default_browser=$(($chrome_is_http_browser && $chrome_is_https_browser))
 
-    if [[ $CHROME_IS_DEFAULT_BROWSER -ne 0 ]]; then
-        echo "Setting Chrome as default browser..."
+    if [[ $chrome_is_default_browser -ne 0 ]]; then
+        log_info "Setting $(clr_cyan 'Chrome')  as default browser..." $module_name
         duti -s com.google.chrome http
         duti -s com.google.chrome https
     else
-        echo "Chrome is already default browser. Continuing..."
+        log_info "$(clr_cyan 'Chrome') is already default browser. $(clr_bright 'Continuing...')" $module_name
     fi
 
-    HAS_CORRECT_INITIAL_KEY_REPEAT=$(defaults read -g InitialKeyRepeat)
+    local has_correct_initial_key_repeat=$(defaults read -g InitialKeyRepeat)
 
-    if [[ $HAS_CORRECT_INITIAL_KEY_REPEAT -ne 25 ]]; then
-        echo "Setting InitialKeyRepeat to 25..."
+    if [[ $has_correct_initial_key_repeat -ne 25 ]]; then
+        log_info "Setting $(clr_cyan 'InitialKeyRepeat') to $(clr_cyan '25')..." $module_name
         defaults write -g InitialKeyRepeat -int 25
         killall -HUP cfprefsd
     else
-        echo "InitialKeyRepeat is set to 25. Continuing..."
+        log_info "$(clr_cyan 'InitialKeyRepeat') is set to $(clr_cyan '25'). $(clr_bright 'Continuing...')" $module_name
     fi
 
-    HAS_CORRECT_KEY_REPEAT=$(defaults read -g KeyRepeat)
+    local has_correct_key_repeat=$(defaults read -g KeyRepeat)
 
-    if [[ $HAS_CORRECT_KEY_REPEAT -ne 2 ]]; then
-        echo "Setting KeyRepeat to 2..."
+    if [[ $has_correct_key_repeat -ne 2 ]]; then
+        log_info "Setting $(clr_cyan 'KeyRepeat') to $(clr_cyan '2')..." $module_name
         defaults write -g KeyRepeat -int 2
         killall -HUP cfprefsd
     else
-        echo "KeyRepeat is set to 2. Continuing..."
+        log_info "$(clr_cyan 'KeyRepeat') is set to $(clr_cyan '2'). $(clr_bright 'Continuing...')" $module_name
     fi
 
-    HAS_AUTOENV_ZSHRC_CONFIG=$(is_config_in_zshrc autoenv)
-    if [[ $HAS_AUTOENV_ZSHRC_CONFIG -eq 1 ]]; then
-        echo "Writing .zshrc autoenv configuration..."
+    local git_global_config=$(git config list --global)
+    local git_settings=(
+        'pull.rebase=true'
+        'push.autosetupremote=true'
+        'merge.conflictstyle=zdiff3'
+    )
 
-        cat <<'EOF' >>~/.zshrc
+    for setting in "${git_settings[@]}"; do
+        local key=$(echo $setting | cut -d '=' -f 1)
+        local value=$(echo $setting | cut -d '=' -f 2)
 
-### BEGIN_CONF autoenv
+        echo $git_global_config | run_silent "grep $setting"
 
-source $(brew --prefix autoenv)/activate.sh
+        if [[ $? -eq 0 ]]; then
+            log_info "git global $(clr_cyan $key) is setup correctly. $(clr_bright 'Continuing...')" $module_name
+        else
+            log_info "Setting git global $(clr_cyan $key)..." $module_name
 
-### END_CONF autoenv
-EOF
-    else
-        echo ".zshrc autoenv configuration present. Continuing..."
-    fi
+            git config set --global $key $value
+        fi
+    done
 
-    GIT_GLOBAL_CONFIG=$(git config list --global)
-
-    GIT_PUSH_AUTO_SETUP_REMOTE_SET=$(echo $GIT_GLOBAL_CONFIG | grep 'push.autosetupremote=true' >/dev/null 2>&1 && echo 0 || echo 1)
-    if [[ $GIT_PUSH_AUTO_SETUP_REMOTE_SET -eq 0 ]]; then
-        echo "git global push.autosetupremote is setup correctly. Continuing..."
-    else
-        echo "Setting git global push.autosetupremote..."
-        git config set --global push.autosetupremote true
-    fi
-
-    GIT_CONFIG_PULL_REBASE_SET=$(echo $GIT_GLOBAL_CONFIG | grep 'pull.rebase=true' >/dev/null 2>&1 && echo 0 || echo 1)
-    if [[ $GIT_CONFIG_PULL_REBASE_SET -eq 0 ]]; then
-        echo "git global pull.rebase is setup correctly. Continuing..."
-    else
-        echo "Setting git global pull.rebase..."
-        git config set --global pull.rebase true
-    fi
-
-    GIT_CONFIG_MERGE_CONFLICT_STYLE_SET=$(echo $GIT_GLOBAL_CONFIG | grep 'merge.conflictstyle=zdiff3' >/dev/null 2>&1 && echo 0 || echo 1)
-    if [[ $GIT_CONFIG_MERGE_CONFLICT_STYLE_SET -eq 0 ]]; then
-        echo "git global merge.conflictstyle is setup correctly. Continuing..."
-    else
-        echo "Setting git global merge.conflictstyle..."
-        git config set --global merge.conflictstyle zdiff3
-    fi
-
-    # aliases
-    #  export ppath=$(echo "$PATH" | tr ':' '\n' )
-    # fzf --preview "bat --color=always --style=numbers --line-range=:500 {}"
-    # fd . -X bat
-    # export add-gitginore=npx add-gitignore
-    # export chokidar=npx chokidar-cli
-    # export carbon=npx carbon-now-cli
-    # export caniuse=npx caniuse-cmd
-    # export serve=npx serve
-    # export doctoc=npx doctoc
-    # export cat=bat
-    # export ls=eza
-    # alias zsrc=source ~/.zshrc
+    log_info "$(clr_green "$module_name setup complete")" $module_name
 }
