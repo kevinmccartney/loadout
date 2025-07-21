@@ -25,14 +25,14 @@ source ./modules/dracula.sh
 source ./modules/vscode.sh
 source ./modules/aliases.sh
 
-# setup_system
-# setup_tty
-# setup_nodejs
-# setup_python
-# setup_ruby
-# setup_dotnet
-# setup_go
-# setup_apps
+setup_system
+setup_tty
+setup_nodejs
+setup_python
+setup_ruby
+setup_dotnet
+setup_go
+setup_apps
 setup_dracula
-# setup_vscode
+setup_vscode
 setup_aliases

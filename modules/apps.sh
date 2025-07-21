@@ -21,6 +21,9 @@ function setup_apps() {
         'rectangle'
         'microsoft-teams'
         'wireshark'
+        'android-studio'
+        'obsidian'
+        '1password'
     )
 
     for cask in "${casks[@]}"; do

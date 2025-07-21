@@ -51,6 +51,8 @@ function setup_system() {
         'openssh'
         'miller'
         'base64'
+        'docker'
+        'watchman'
     )
 
     for formula in "${formulas[@]}"; do

@@ -96,7 +96,7 @@ EOF
 
     local alias_finder_zshrc_content=$(
         cat <<EOF
-zstyle :omz:plugins:alias-finder' autoload yes # disabled by default
+zstyle ':omz:plugins:alias-finder' autoload yes # disabled by default
 zstyle ':omz:plugins:alias-finder' cheaper yes # disabled by default
 EOF
     )
