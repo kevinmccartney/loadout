@@ -25,5 +25,10 @@ function setup_dotnet() {
         attempt_brew_install $version $module_name 1
     done
 
+    if [[ ! -L /usr/local/bin/dotnet ]]; then
+        log_info "Creating dotnet symlink..." $module_name
+        sudo ln -sf /usr/local/share/dotnet/dotnet /usr/local/bin/dotnet
+    fi
+
     log_info "$(clr_green "$module_name setup complete")" $module_name
 }
